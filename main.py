@@ -135,6 +135,11 @@ def main():
         for node, gauge in dashboard_gauge_nodes.items():
             gauge.setProperty('value', node.get())
 
+    def select_config(index):
+        node = index.internalPointer().node
+        if isinstance(node, interface.TfiSensorConfigNode):
+            print("selected sensor config")
+
     def populate_config_model():
         nonlocal config_nodes_model
         config_nodes_model = ConfigTreeModel(None, config_nodes.nodes)
@@ -160,6 +165,8 @@ def main():
         refresh_timer.start(50)
     
     config_nodes.listing_updated.connect(populate_config_model)
+    treeview = engine.rootObjects()[0].findChild(QQuickItem, "ConfigTree")
+    treeview.activated.connect(select_config)
     
     tcpsrc.start()
     

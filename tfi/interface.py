@@ -106,6 +106,45 @@ class Tfi(QObject):
         locker = QMutexLocker(self.lock)
         return copy.copy(self.status)
 
+class TfiConfigNode(QObject):
+    read_complete = pyqtSignal()
+    write_complete = pyqtSignal()
+    
+    def __init__(self, interface, node):
+        super(TfiConfigNode, self).__init__()
+       
+        self.name = node
+        self.interface = interface
+        self.value = None
+        self.issue_read()
+
+    def get(self):
+        return self.value
+
+    def issue_read(self):
+        def _read_cb(line, success):
+            if not success:
+                return
+            self.value = line
+            self.read_complete.emit()
+        self.interface.get(self.name, _read_cb)
+
+    def issue_write(self, val):
+        pass
+
+    def _is_table(self):
+        return self.name.startswith("config.table.")
+
+    def _is_sensor(self):
+        return self.name.startswith("config.sensor.")
+
+    def _is_event(self):
+        return self.name == "config.events"
+
+class TfiSensorConfigNode(TfiConfigNode):
+    def __init__(self, interface, node):
+        super(TfiSensorConfigNode, self).__init__(interface, node)
+
 class ConfigNodeList(QObject):
     listing_updated = pyqtSignal()
     feedline_updated = pyqtSignal()
@@ -113,6 +152,7 @@ class ConfigNodeList(QObject):
     special_nodes = {
             "flash" : None,
             "stats" : None,
+            "config.sensors.": TfiSensorConfigNode,
             }
 
     def __init__(self, interface):
@@ -152,37 +192,3 @@ class ConfigNodeList(QObject):
                 self.nodes[node] = cons(self.interface, node)
         self.listing_updated.emit()
 
-class TfiConfigNode(QObject):
-    read_complete = pyqtSignal()
-    write_complete = pyqtSignal()
-    
-    def __init__(self, interface, node):
-        super(TfiConfigNode, self).__init__()
-       
-        self.name = node
-        self.interface = interface
-        self.value = None
-        self.issue_read()
-
-    def get(self):
-        return self.value
-
-    def issue_read(self):
-        def _read_cb(line, success):
-            if not success:
-                return
-            self.value = line
-            self.read_complete.emit()
-        self.interface.get(self.name, _read_cb)
-
-    def issue_write(self, val):
-        pass
-
-    def _is_table(self):
-        return self.name.startswith("config.table.")
-
-    def _is_sensor(self):
-        return self.name.startswith("config.sensor.")
-
-    def _is_event(self):
-        return self.name == "config.events"

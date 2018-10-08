@@ -6,7 +6,5 @@
         <file>DashboardForm.ui.qml</file>
         <file>SensorEditor.qml</file>
         <file>SensorEditorForm.ui.qml</file>
-        <file>NodeEditor.qml</file>
-        <file>NodeEditorForm.ui.qml</file>
     </qresource>
 </RCC>

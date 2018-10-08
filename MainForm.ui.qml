@@ -31,6 +31,7 @@ Item {
             id: configTree
             width: 300
             model: configTreeModel
+            objectName: "ConfigTree"
         }
 
         SplitView {
